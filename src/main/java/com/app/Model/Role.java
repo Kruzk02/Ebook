@@ -13,22 +13,28 @@ import java.util.Collection;
 @Getter
 @Setter
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "role")
+public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String username;
-    private String email;
-    private String password;
+    private String name;
+
+    @ManyToMany(mappedBy = "roles")
+    private Collection<User> users;
 
     @ManyToMany
     @JoinTable(
-            name = "users_roles",
+            name = "roles_privileges",
             joinColumns = @JoinColumn(
-                    name = "user_id", referencedColumnName = "id"),
+                    name = "role_id",referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(
-                    name = "role_id", referencedColumnName = "id"))
-    private Collection<Role> roles;
+                    name = "privilege_id",referencedColumnName = "id")
+    )
+    private Collection<Privilege> privileges;
+
+    public Role(String name) {
+        this.name = name;
+    }
 }
