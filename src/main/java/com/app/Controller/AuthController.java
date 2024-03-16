@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,10 +56,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO){
         try {
-            userService.login(loginDTO);
-            return ResponseEntity.status(HttpStatus.OK).build();
+            String token = userService.login(loginDTO);
+            Map<String,String> response = new HashMap<>();
+            response.put("token",token);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Invalid username or password.");
         }
     }
 

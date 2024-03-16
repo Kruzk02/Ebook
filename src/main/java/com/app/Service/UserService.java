@@ -6,7 +6,7 @@ import com.app.Model.User;
 
 public interface UserService {
     User register(RegisterDTO registerDTO);
-    void login(LoginDTO loginDTO);
+    String login(LoginDTO loginDTO);
     User findByUsername(String username);
     User findById(Long id);
     User findByEmail(String email);
