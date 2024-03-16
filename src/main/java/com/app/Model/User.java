@@ -1,5 +1,7 @@
 package com.app.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,6 +23,7 @@ public class User {
     private String email;
     private String password;
 
+    @JsonBackReference
     @ManyToMany
     @JoinTable(
             name = "users_roles",

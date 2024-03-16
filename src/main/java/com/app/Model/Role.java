@@ -1,5 +1,7 @@
 package com.app.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,6 +23,7 @@ public class Role {
     private Long id;
     private String name;
 
+    @JsonManagedReference
     @ManyToMany(mappedBy = "roles")
     private Collection<User> users;
 
@@ -28,10 +31,9 @@ public class Role {
     @JoinTable(
             name = "roles_privileges",
             joinColumns = @JoinColumn(
-                    name = "role_id",referencedColumnName = "id"),
+                    name = "role_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(
-                    name = "privilege_id",referencedColumnName = "id")
-    )
+                    name = "privilege_id", referencedColumnName = "id"))
     private Collection<Privilege> privileges;
 
     public Role(String name) {

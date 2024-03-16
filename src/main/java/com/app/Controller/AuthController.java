@@ -1,5 +1,6 @@
 package com.app.Controller;
 
+
 import com.app.DTO.LoginDTO;
 import com.app.DTO.RegisterDTO;
 import com.app.Model.User;
@@ -44,7 +45,6 @@ public class AuthController {
             }
 
             User user = userService.register(registerDTO);
-            System.out.println(user);
             return ResponseEntity.status(HttpStatus.CREATED).body(user);
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");

@@ -36,13 +36,13 @@ public class SetupData implements ApplicationListener<ContextRefreshedEvent> {
         createRoleIfNotFound("ROLE_ADMIN",adminPrivilege);
         createRoleIfNotFound("ROLE_USER", Arrays.asList(readPrivilege));
 
-        Role adminRole = roleRepository.findByName("ROLE_ADMIN");
-        User user = new User();
-        user.setUsername("phucnguyen");
-        user.setEmail("phucnguyen@gmail.com");
-        user.setPassword(passwordEncoder.encode("123123"));
-        user.setRoles(Arrays.asList(adminRole));
-        userRepository.save(user);
+//        Role adminRole = roleRepository.findByName("ROLE_ADMIN");
+//        User user = new User();
+//        user.setUsername("phucnguyen");
+//        user.setEmail("phucnguyen@gmail.com");
+//        user.setPassword(passwordEncoder.encode("123123"));
+//        user.setRoles(Arrays.asList(adminRole));
+//        userRepository.save(user);
 
         alreadySetup = true;
     }

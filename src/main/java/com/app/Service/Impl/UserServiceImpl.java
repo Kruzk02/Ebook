@@ -1,5 +1,6 @@
 package com.app.Service.Impl;
 
+
 import com.app.DTO.LoginDTO;
 import com.app.DTO.RegisterDTO;
 import com.app.Model.User;
@@ -40,7 +41,7 @@ public class UserServiceImpl implements UserService {
         User user = modelMapper.map(registerDTO,User.class);
         user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
         user.setRoles(Arrays.asList(roleRepository.findByName("ROLE_USER")));
-        return user;
+        return userRepository.save(user);
     }
 
     @Override
