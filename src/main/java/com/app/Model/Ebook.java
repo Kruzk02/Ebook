@@ -30,5 +30,6 @@ public class Ebook {
     @ElementCollection
     private Set<Genre> genres;
     private String description;
-    private String pdfFile;
+    private String pdfUrl;
+    private String fileName;
 }
