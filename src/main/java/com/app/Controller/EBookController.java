@@ -1,7 +1,6 @@
 package com.app.Controller;
 
 import com.app.DTO.EBookDTO;
-import com.app.Model.Author;
 import com.app.Model.Ebook;
 import com.app.Service.Impl.EBookServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -75,15 +73,6 @@ public class EBookController {
     public ResponseEntity<?> getEBookById(@PathVariable Long id){
         try{
             Ebook ebook = bookService.getById(id);
-            return ResponseEntity.status(HttpStatus.OK).body(ebook);
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
-
-    public ResponseEntity<?> getEBookByAuthor(){
-        try{
-            Ebook ebook = bookService.getByAuthor();
             return ResponseEntity.status(HttpStatus.OK).body(ebook);
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
