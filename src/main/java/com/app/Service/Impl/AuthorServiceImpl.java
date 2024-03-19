@@ -40,6 +40,16 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     /**
+     * Retrieves Author by its Name.
+     * @param name The Name of the Author to retrieve.
+     * @return The Author entity corresponding to the provided name.
+     */
+    @Override
+    public Author getByName(String name) {
+        return authorRepository.findByName(name);
+    }
+
+    /**
      * Retrieves Author by its ID.
      * @param id The ID of the Author to retrieve.
      * @return The Author entity corresponding to the provided ID.
