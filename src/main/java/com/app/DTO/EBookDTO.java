@@ -1,7 +1,5 @@
 package com.app.DTO;
 
-import com.app.Model.Author;
-import com.app.Model.Genre;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +15,7 @@ public class EBookDTO {
 
     private String title;
     private String description;
-    private Set<Genre> genres;
-    private Set<Author> authors;
+    private Set<String> genres;
+    private Set<String> authors;
 
 }

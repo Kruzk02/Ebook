@@ -1,5 +1,6 @@
 package com.app.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,6 +22,7 @@ public class Ebook {
     private Long id;
     private String title;
 
+    @JsonBackReference
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "ebooks_authors",
             joinColumns = @JoinColumn(name = "ebooks_id"),

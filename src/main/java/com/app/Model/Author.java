@@ -1,5 +1,6 @@
 package com.app.Model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,6 +22,7 @@ public class Author {
     private Long id;
     private String name;
 
+    @JsonManagedReference
     @ManyToMany(mappedBy = "authors",fetch = FetchType.LAZY)
     private Set<Ebook> ebooks;
 }

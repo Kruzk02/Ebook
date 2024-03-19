@@ -3,8 +3,11 @@ package com.app.Service.Impl;
 import com.app.DTO.EBookDTO;
 import com.app.Model.Author;
 import com.app.Model.Ebook;
+import com.app.Model.Genre;
+import com.app.Repository.AuthorRepository;
 import com.app.Repository.EbookRepository;
 import com.app.Service.EbookService;
+import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +19,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * EBook Service class responsible for handling operation relates to EBook Entity. <p>
@@ -24,20 +30,24 @@ import java.util.List;
  * and utilizes ModelMapper for mapping between DTOs and entity object.
  */
 @Service
+@Log4j2
 public class EBookServiceImpl implements EbookService {
 
     private final EbookRepository ebookRepository;
+    private final AuthorRepository authorRepository;
     private final ModelMapper modelMapper;
 
     /**
      * Constructs a new EBookServiceImpl
      *
-     * @param ebookRepository The EbookRepository for accessing EBook relate data.
-     * @param modelMapper The ModelMapper for entity-DTO mapping.
+     * @param ebookRepository  The EbookRepository for accessing EBook relate data.
+     * @param authorRepository The AuthorRepository for accessing Author relate data.
+     * @param modelMapper      The ModelMapper for entity-DTO mapping.
      */
     @Autowired
-    public EBookServiceImpl(EbookRepository ebookRepository, ModelMapper modelMapper) {
+    public EBookServiceImpl(EbookRepository ebookRepository, AuthorRepository authorRepository, ModelMapper modelMapper) {
         this.ebookRepository = ebookRepository;
+        this.authorRepository = authorRepository;
         this.modelMapper = modelMapper;
     }
 
@@ -87,15 +97,35 @@ public class EBookServiceImpl implements EbookService {
         if(!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
 
         try (InputStream inputStream = multipartFile.getInputStream()){
-            Path filePath = uploadPath.resolve(multipartFile.getOriginalFilename());
+            Path filePath = uploadPath.resolve(Objects.requireNonNull(multipartFile.getOriginalFilename()));
             Files.copy(inputStream,filePath, StandardCopyOption.REPLACE_EXISTING);
 
             Ebook ebook = modelMapper.map(eBookDTO,Ebook.class);
             ebook.setPdfUrl(filePath.toString());
             ebook.setFileName(multipartFile.getOriginalFilename());
 
+            Set<Author> authors = new HashSet<>();
+            for(String authorName : eBookDTO.getAuthors()){
+                Author author = authorRepository.findByName(authorName);
+                if(author == null){
+                    author = new Author();
+                    author.setName(authorName);
+                    authorRepository.save(author);
+                }
+                authors.add(author);
+            }
+
+            ebook.setAuthors(authors);
+
+            Set<Genre> genres = new HashSet<>();
+            for(String genreString : eBookDTO.getGenres()){
+                genres.add(Genre.valueOf(genreString.toUpperCase()));
+            }
+            ebook.setGenres(genres);
+
             return ebookRepository.save(ebook);
         }catch (Exception e){
+            log.error("Error occurred while saving file: {}", e.getMessage());
             throw new IOException("Could not save file: " + multipartFile.getOriginalFilename(), e);
         }
     }
