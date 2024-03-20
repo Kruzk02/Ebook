@@ -1,12 +1,14 @@
 package com.app.Service.Impl;
 
 import com.app.DTO.EBookDTO;
+import com.app.Exceptions.EBookNotFoundException;
 import com.app.Model.Author;
 import com.app.Model.Ebook;
 import com.app.Model.Genre;
 import com.app.Repository.AuthorRepository;
 import com.app.Repository.EbookRepository;
 import com.app.Service.EbookService;
+import com.app.Exceptions.AuthorNotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +71,7 @@ public class EBookServiceImpl implements EbookService {
      */
     @Override
     public Ebook getById(Long id) {
-        return ebookRepository.findById(id).orElse(null);
+        return ebookRepository.findById(id).orElseThrow(() -> new EBookNotFoundException("EBook Not Found."));
     }
 
     /**
@@ -108,25 +110,26 @@ public class EBookServiceImpl implements EbookService {
             for(String authorName : eBookDTO.getAuthors()){
                 Author author = authorRepository.findByName(authorName);
                 if(author == null){
-                    author = new Author();
-                    author.setName(authorName);
-                    authorRepository.save(author);
+                    throw new AuthorNotFoundException("Author not found: " + authorName);
                 }
                 authors.add(author);
             }
-
-            ebook.setAuthors(authors);
 
             Set<Genre> genres = new HashSet<>();
             for(String genreString : eBookDTO.getGenres()){
                 genres.add(Genre.valueOf(genreString.toUpperCase()));
             }
+
+            ebook.setAuthors(authors);
             ebook.setGenres(genres);
 
             return ebookRepository.save(ebook);
-        }catch (Exception e){
+        }catch (IOException e){
             log.error("Error occurred while saving file: {}", e.getMessage());
-            throw new IOException("Could not save file: " + multipartFile.getOriginalFilename(), e);
+            throw new IOException(e.getMessage());
+        }catch (AuthorNotFoundException e){
+            log.error("Error occurred while saving file: {}", e.getMessage());
+            throw new AuthorNotFoundException(e.getMessage());
         }
     }
 
