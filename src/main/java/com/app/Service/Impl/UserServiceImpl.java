@@ -3,6 +3,7 @@ package com.app.Service.Impl;
 
 import com.app.DTO.LoginDTO;
 import com.app.DTO.RegisterDTO;
+import com.app.Exceptions.UserNotFoundException;
 import com.app.JWT.JwtProvider;
 import com.app.Model.User;
 import com.app.Repository.RoleRepository;
@@ -64,7 +65,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findById(Long id) {
-        return userRepository.findById(id).orElse(null);
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User Not Found"));
     }
 
     @Override

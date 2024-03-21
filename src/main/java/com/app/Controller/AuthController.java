@@ -31,38 +31,34 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterDTO registerDTO){
-        try{
-            if(!isValidEmail(registerDTO.getEmail())){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid email address.");
-            }
-
-            User existingEmail = userService.findByEmail(registerDTO.getEmail());
-            User existingUsername = userService.findByUsername(registerDTO.getUsername());
-
-            if(existingEmail != null){
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("Email is already taken.");
-            }
-            if(existingUsername != null){
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("Username is already taken.");
-            }
-
-            User user = userService.register(registerDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(user);
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
+        if(!isValidEmail(registerDTO.getEmail())){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid email address.");
         }
+
+        if(!isValidPassword(registerDTO.getPassword())){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password should have at least 1 digit , lowercase letter, uppercase letter and special character ");
+        }
+
+        User existingEmail = userService.findByEmail(registerDTO.getEmail());
+        User existingUsername = userService.findByUsername(registerDTO.getUsername());
+
+        if(existingEmail != null){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email is already taken.");
+        }
+        if(existingUsername != null){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Username is already taken.");
+        }
+
+        User user = userService.register(registerDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO){
-        try {
-            String token = userService.login(loginDTO);
-            Map<String,String> response = new HashMap<>();
-            response.put("token",token);
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Invalid username or password.");
-        }
+        String token = userService.login(loginDTO);
+        Map<String,String> response = new HashMap<>();
+        response.put("token",token);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     private boolean isValidEmail(String email) {
@@ -70,6 +66,14 @@ public class AuthController {
                 "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
         Pattern pattern = Pattern.compile(EMAIL_REGEX);
         Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
+
+    private boolean isValidPassword(String password){
+        String PASSWORD_REGEX = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$";
+
+        Pattern pattern = Pattern.compile(PASSWORD_REGEX);
+        Matcher matcher = pattern.matcher(password);
         return matcher.matches();
     }
 }

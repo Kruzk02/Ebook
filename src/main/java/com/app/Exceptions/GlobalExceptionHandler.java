@@ -33,4 +33,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorResponse response = new ErrorResponse("EBook Not Found");
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<?> handleUserNotFoundException(UserNotFoundException ex) {
+        ErrorResponse response = new ErrorResponse("User Not Found");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
 }
