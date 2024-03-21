@@ -5,6 +5,7 @@ import com.app.Model.Author;
 import com.app.Model.Ebook;
 import com.app.Service.Impl.AuthorServiceImpl;
 import com.app.Service.Impl.EBookServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ public class AuthorController {
     private final EBookServiceImpl eBookService;
     private final AuthorServiceImpl authorService;
 
+    @Autowired
     public AuthorController(EBookServiceImpl eBookService, AuthorServiceImpl authorService) {
         this.eBookService = eBookService;
         this.authorService = authorService;
@@ -25,46 +27,31 @@ public class AuthorController {
 
     @GetMapping
     public ResponseEntity<?> getAllAuthor(){
-        try{
-            List<Author> authors = authorService.getAllAuthor();
-            return ResponseEntity.status(HttpStatus.OK).body(authors);
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        List<Author> authors = authorService.getAllAuthor();
+        return ResponseEntity.status(HttpStatus.OK).body(authors);
     }
 
     @PostMapping("/create")
     public ResponseEntity<?> createAuthor(@RequestBody AuthorDTO authorDTO){
-        try {
-            Author author = authorService.save(authorDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(author);
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        Author author = authorService.save(authorDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(author);
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteById(@PathVariable Long id){
-        try {
-            authorService.deleteById(id);
-            return ResponseEntity.status(HttpStatus.OK).build();
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        authorService.deleteById(id);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @GetMapping("/{authorName}")
     public ResponseEntity<?> getEBookByAuthor(@PathVariable String authorName){
-        try{
-            Author author = authorService.getByName(authorName);
-            if(author == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        Author author = authorService.getByName(authorName);
+        if(author == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
-            Ebook ebook = eBookService.getByAuthor(author);
-            if(ebook == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            return ResponseEntity.status(HttpStatus.OK).body(ebook);
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        Ebook ebook = eBookService.getByAuthor(author);
+        if(ebook == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(ebook);
     }
 
 

@@ -23,6 +23,6 @@ public class Author {
     private String name;
 
     @JsonManagedReference
-    @ManyToMany(mappedBy = "authors",fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "authors",fetch = FetchType.LAZY,cascade = CascadeType.REMOVE)
     private Set<Ebook> ebooks;
 }

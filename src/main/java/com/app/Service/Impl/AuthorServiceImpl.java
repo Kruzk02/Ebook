@@ -1,6 +1,7 @@
 package com.app.Service.Impl;
 
 import com.app.DTO.AuthorDTO;
+import com.app.Exceptions.AuthorNotFoundException;
 import com.app.Model.Author;
 import com.app.Repository.AuthorRepository;
 import com.app.Service.AuthorService;
@@ -56,7 +57,7 @@ public class AuthorServiceImpl implements AuthorService {
      */
     @Override
     public Author getById(Long id) {
-        return authorRepository.findById(id).orElse(null);
+        return authorRepository.findById(id).orElseThrow(() -> new AuthorNotFoundException("Author Not Found"));
     }
 
     /**
