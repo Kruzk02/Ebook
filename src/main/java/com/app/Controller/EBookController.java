@@ -2,14 +2,18 @@ package com.app.Controller;
 
 import com.app.DTO.EBookDTO;
 import com.app.Exceptions.AuthorNotFoundException;
+import com.app.JWT.JwtProvider;
 import com.app.Model.Ebook;
+import com.app.Model.User;
 import com.app.Service.Impl.EBookServiceImpl;
+import com.app.Service.Impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,10 +28,14 @@ import java.util.List;
 public class EBookController {
 
     private final EBookServiceImpl bookService;
+    private final UserServiceImpl userService;
+    private final JwtProvider jwtProvider;
 
     @Autowired
-    public EBookController(EBookServiceImpl bookService) {
+    public EBookController(EBookServiceImpl bookService, UserServiceImpl userService, JwtProvider jwtProvider) {
         this.bookService = bookService;
+        this.userService = userService;
+        this.jwtProvider = jwtProvider;
     }
 
     @GetMapping
@@ -36,11 +44,24 @@ public class EBookController {
         return ResponseEntity.status(HttpStatus.OK).body(ebook);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/upload")
     public ResponseEntity<?> uploadEBook(@ModelAttribute EBookDTO eBookDTO,
-                                         @RequestParam("file")MultipartFile file) throws IOException, AuthorNotFoundException{
-        Ebook ebook = bookService.save(eBookDTO,file);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ebook);
+                                         @RequestParam("file")MultipartFile file,
+                                         @RequestHeader("Authorization") String authHeader) throws IOException, AuthorNotFoundException{
+        String token = extractToken(authHeader);
+
+        if(token != null){
+            String username = jwtProvider.extractUsername(token);
+            User user = userService.findByUsername(username);
+
+            eBookDTO.setUploadBy(user);
+
+            Ebook ebook = bookService.save(eBookDTO,file);
+            return ResponseEntity.status(HttpStatus.CREATED).body(ebook);
+        }else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Authorization Header");
+        }
     }
 
     @PostMapping("/download/{id}")
@@ -66,9 +87,17 @@ public class EBookController {
         return ResponseEntity.status(HttpStatus.OK).body(ebook);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteEBookById(@PathVariable Long id){
         bookService.deleteById(id);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    private String extractToken(String authHeader){
+        if(authHeader != null && authHeader.startsWith("Bearer ")){
+            return authHeader.substring(7);
+        }
+        return null;
     }
 }

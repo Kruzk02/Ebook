@@ -23,7 +23,7 @@ public class Ebook {
     private String title;
 
     @JsonBackReference
-    @ManyToMany(fetch = FetchType.LAZY,cascade = CascadeType.REMOVE)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "ebooks_authors",
             joinColumns = @JoinColumn(name = "ebooks_id"),
             inverseJoinColumns = @JoinColumn(name = "authors_id"))
@@ -34,4 +34,8 @@ public class Ebook {
     private String description;
     private String pdfUrl;
     private String fileName;
+
+    @ManyToOne
+    @JoinColumn(name = "uploadBy",referencedColumnName = "id")
+    private User uploadBy;
 }
