@@ -3,8 +3,8 @@ package com.app.Controller;
 import com.app.DTO.AuthorDTO;
 import com.app.Model.Author;
 import com.app.Model.Ebook;
+import com.app.Service.EbookService;
 import com.app.Service.Impl.AuthorServiceImpl;
-import com.app.Service.Impl.EBookServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +17,11 @@ import java.util.List;
 @RequestMapping("/api/author")
 public class AuthorController {
 
-    private final EBookServiceImpl eBookService;
+    private final EbookService eBookService;
     private final AuthorServiceImpl authorService;
 
     @Autowired
-    public AuthorController(EBookServiceImpl eBookService, AuthorServiceImpl authorService) {
+    public AuthorController(EbookService eBookService, AuthorServiceImpl authorService) {
         this.eBookService = eBookService;
         this.authorService = authorService;
     }

@@ -5,8 +5,8 @@ import com.app.Exceptions.AuthorNotFoundException;
 import com.app.JWT.JwtProvider;
 import com.app.Model.Ebook;
 import com.app.Model.User;
-import com.app.Service.Impl.EBookServiceImpl;
-import com.app.Service.Impl.UserServiceImpl;
+import com.app.Service.EbookService;
+import com.app.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -27,12 +27,12 @@ import java.util.List;
 @RequestMapping("/api/ebook")
 public class EBookController {
 
-    private final EBookServiceImpl bookService;
-    private final UserServiceImpl userService;
+    private final EbookService bookService;
+    private final UserService userService;
     private final JwtProvider jwtProvider;
 
     @Autowired
-    public EBookController(EBookServiceImpl bookService, UserServiceImpl userService, JwtProvider jwtProvider) {
+    public EBookController(EbookService bookService, UserService userService, JwtProvider jwtProvider) {
         this.bookService = bookService;
         this.userService = userService;
         this.jwtProvider = jwtProvider;
@@ -48,7 +48,7 @@ public class EBookController {
     @PostMapping("/upload")
     public ResponseEntity<?> uploadEBook(@ModelAttribute EBookDTO eBookDTO,
                                          @RequestParam("file")MultipartFile file,
-                                         @RequestHeader("Authorization") String authHeader) throws IOException, AuthorNotFoundException{
+                                         @RequestHeader("Authorization") String authHeader) throws IOException, AuthorNotFoundException, InterruptedException {
         String token = extractToken(authHeader);
 
         if(token != null){
@@ -57,8 +57,7 @@ public class EBookController {
 
             eBookDTO.setUploadBy(user);
 
-            Ebook ebook = bookService.save(eBookDTO,file);
-            return ResponseEntity.status(HttpStatus.CREATED).body(ebook);
+            return ResponseEntity.status(HttpStatus.CREATED).body(bookService.execute(eBookDTO,file));
         }else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Authorization Header");
         }

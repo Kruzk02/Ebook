@@ -3,6 +3,7 @@ package com.app.Service.Impl;
 import com.app.DTO.EBookDTO;
 import com.app.Model.Ebook;
 import com.app.Repository.EbookRepository;
+import com.app.Service.EbookService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,7 +33,7 @@ class EBookServiceImplTest {
     private ModelMapper modelMapper;
 
     @InjectMocks
-    private EBookServiceImpl eBookService;
+    private EbookService eBookService;
 
     @Test
     void getAllEBook() {
