@@ -12,6 +12,8 @@ import com.app.Exceptions.AuthorNotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,6 +27,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 /**
  * EBook Service class responsible for handling operation relates to EBook Entity. <p>
@@ -51,6 +55,21 @@ public class EBookServiceImpl implements EbookService {
         this.ebookRepository = ebookRepository;
         this.authorRepository = authorRepository;
         this.modelMapper = modelMapper;
+    }
+
+    @Async
+    @Override
+    public Future<Ebook> execute(EBookDTO eBookDTO,MultipartFile file){
+        log.info("Execute method asynchronously - " + Thread.currentThread().getName());
+
+        try {
+            Ebook ebook = save(eBookDTO, file);
+            log.info("Asynchronous task completed successfully");
+            return CompletableFuture.completedFuture(ebook);
+        } catch (IOException e){
+            log.error("Error executing asynchronous task: {}", e.getMessage());
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     /**
@@ -124,12 +143,9 @@ public class EBookServiceImpl implements EbookService {
             ebook.setGenres(genres);
 
             return ebookRepository.save(ebook);
-        }catch (IOException e){
+        }catch (IOException | AuthorNotFoundException e){
             log.error("Error occurred while saving file: {}", e.getMessage());
-            throw new IOException(e.getMessage());
-        }catch (AuthorNotFoundException e){
-            log.error("Error occurred while saving file: {}", e.getMessage());
-            throw new AuthorNotFoundException(e.getMessage());
+            throw e;
         }
     }
 

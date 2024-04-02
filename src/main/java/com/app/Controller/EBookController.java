@@ -56,8 +56,8 @@ public class EBookController {
             User user = userService.findByUsername(username);
 
             eBookDTO.setUploadBy(user);
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(bookService.execute(eBookDTO,file));
+            bookService.execute(eBookDTO,file);
+            return ResponseEntity.status(HttpStatus.CREATED).build();
         }else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Authorization Header");
         }
