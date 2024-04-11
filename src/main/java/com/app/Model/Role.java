@@ -1,6 +1,7 @@
 package com.app.Model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -24,9 +25,11 @@ public class Role {
     private String name;
 
     @JsonManagedReference
+    @JsonIgnore
     @ManyToMany(mappedBy = "roles")
     private Collection<User> users;
 
+    @JsonBackReference
     @ManyToMany
     @JoinTable(
             name = "roles_privileges",

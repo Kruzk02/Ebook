@@ -21,6 +21,7 @@ public class Privilege {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    @JsonManagedReference
     @ManyToMany(mappedBy = "privileges")
     private Collection<Role> roles;
 
