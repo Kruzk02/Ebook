@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Collection;
 import java.util.Set;
 
 @NoArgsConstructor
@@ -38,4 +39,7 @@ public class Ebook {
     @ManyToOne
     @JoinColumn(name = "uploadBy",referencedColumnName = "id")
     private User uploadBy;
+
+    @OneToMany(mappedBy = "ebooks")
+    private Collection<Comment> comment;
 }
