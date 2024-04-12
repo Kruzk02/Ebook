@@ -39,4 +39,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorResponse response = new ErrorResponse("User Not Found");
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(CommentNotFoundException.class)
+    public ResponseEntity<?> handleCommentNotFoundException(CommentNotFoundException ex){
+        ErrorResponse response = new ErrorResponse("Comment Not Found");
+        return new ResponseEntity<>(response,HttpStatus.NOT_FOUND);
+    }
 }
