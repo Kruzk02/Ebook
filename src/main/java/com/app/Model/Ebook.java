@@ -39,6 +39,7 @@ public class Ebook {
     @JoinColumn(name = "uploadBy",referencedColumnName = "id")
     private User uploadBy;
 
+
     @OneToMany(mappedBy = "ebook")
     @JsonIgnore
     private Collection<Comment> comment;
