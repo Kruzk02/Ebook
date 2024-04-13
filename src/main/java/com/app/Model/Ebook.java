@@ -1,11 +1,9 @@
 package com.app.Model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Collection;
 import java.util.Set;
@@ -14,6 +12,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 @Entity
 @Table(name = "ebooks")
 public class Ebook {
@@ -40,6 +39,8 @@ public class Ebook {
     @JoinColumn(name = "uploadBy",referencedColumnName = "id")
     private User uploadBy;
 
-    @OneToMany(mappedBy = "ebooks")
+
+    @OneToMany(mappedBy = "ebook")
+    @JsonIgnore
     private Collection<Comment> comment;
 }

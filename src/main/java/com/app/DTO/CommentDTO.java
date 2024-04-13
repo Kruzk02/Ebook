@@ -15,5 +15,5 @@ public class CommentDTO {
 
     private String content;
     private User user;
-    private Ebook ebook;
+    private Long ebookId;
 }
