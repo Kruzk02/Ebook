@@ -30,6 +30,7 @@ public class Role {
     private Collection<User> users;
 
     @JsonBackReference
+    @JsonIgnore
     @ManyToMany
     @JoinTable(
             name = "roles_privileges",
