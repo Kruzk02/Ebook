@@ -6,6 +6,7 @@ import com.app.Model.Author;
 import com.app.Repository.AuthorRepository;
 import com.app.Service.AuthorService;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,6 +36,7 @@ public class AuthorServiceImpl implements AuthorService {
      * Retrieves all Author.
      * @return A list of all Author.
      */
+    @Cacheable(value = "authors")
     @Override
     public List<Author> getAllAuthor() {
         return authorRepository.findAll();
@@ -55,6 +57,7 @@ public class AuthorServiceImpl implements AuthorService {
      * @param id The ID of the Author to retrieve.
      * @return The Author entity corresponding to the provided ID.
      */
+    @Cacheable(value = "authors",key = "#id")
     @Override
     public Author getById(Long id) {
         return authorRepository.findById(id).orElseThrow(() -> new AuthorNotFoundException("Author Not Found"));

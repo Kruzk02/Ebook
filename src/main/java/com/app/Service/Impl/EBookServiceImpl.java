@@ -12,6 +12,7 @@ import com.app.Exceptions.AuthorNotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
@@ -77,6 +78,7 @@ public class EBookServiceImpl implements EbookService {
      *
      * @return A List of all EBook.
      */
+    @Cacheable(value = "ebooks")
     @Override
     public List<Ebook> getAllEBook() {
         return ebookRepository.findAll();
@@ -88,6 +90,7 @@ public class EBookServiceImpl implements EbookService {
      * @param id The ID of the EBook to retrieve.
      * @return The Ebook entity corresponding to the provided ID.
      */
+    @Cacheable(value = "ebooks",key = "#id")
     @Override
     public Ebook getById(Long id) {
         return ebookRepository.findById(id).orElseThrow(() -> new EBookNotFoundException("EBook Not Found."));

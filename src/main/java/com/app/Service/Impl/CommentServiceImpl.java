@@ -10,6 +10,7 @@ import com.app.Repository.EbookRepository;
 import com.app.Service.CommentService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,6 +27,7 @@ public class CommentServiceImpl implements CommentService {
         this.modelMapper = modelMapper;
     }
 
+    @Cacheable(value = "comments",key = "#id")
     @Override
     public Comment getById(Long id) {
         return commentRepository.findById(id).orElseThrow(() -> new CommentNotFoundException("Comment Not Found"));
