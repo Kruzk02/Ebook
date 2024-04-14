@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
 
@@ -15,7 +16,7 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(name = "ebooks")
-public class Ebook {
+public class Ebook implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
