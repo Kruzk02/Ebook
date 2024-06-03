@@ -14,6 +14,5 @@ public interface EbookService {
     List<Ebook> getAllEBook();
     Ebook getById(Long id);
     Ebook getByAuthor(Author author);
-    Ebook save(EBookDTO eBookDTO, MultipartFile multipartFile) throws IOException;
     void deleteById(Long id);
 }

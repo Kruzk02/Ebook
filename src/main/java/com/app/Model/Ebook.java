@@ -23,7 +23,6 @@ public class Ebook implements Serializable {
     private Long id;
     private String title;
 
-    @JsonBackReference
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "ebooks_authors",
             joinColumns = @JoinColumn(name = "ebooks_id"),

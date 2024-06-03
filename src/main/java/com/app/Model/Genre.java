@@ -1,6 +1,8 @@
 package com.app.Model;
 
-public enum Genre {
+import java.io.Serializable;
+
+public enum Genre implements Serializable {
     FICTION,
     NON_FICTION,
     MYSTERY,

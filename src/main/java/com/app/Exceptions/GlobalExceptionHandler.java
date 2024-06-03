@@ -22,12 +22,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(response,HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(IOException.class)
-    public ResponseEntity<?> handleIOException(IOException ex) {
-        ErrorResponse response = new ErrorResponse("Could Not Save File");
-        return new ResponseEntity<>(response,HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
     @ExceptionHandler(EBookNotFoundException.class)
     public ResponseEntity<?> handleEBookNotFoundException(EBookNotFoundException ex) {
         ErrorResponse response = new ErrorResponse("EBook Not Found");

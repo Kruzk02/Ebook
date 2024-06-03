@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Set;
 
@@ -23,7 +24,7 @@ public class Author implements Serializable {
     private Long id;
     private String name;
 
-    @JsonManagedReference
+    @Transient
     @ManyToMany(mappedBy = "authors",fetch = FetchType.LAZY)
     private Set<Ebook> ebooks;
 }

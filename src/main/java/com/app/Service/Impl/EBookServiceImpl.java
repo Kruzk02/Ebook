@@ -13,8 +13,9 @@ import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,6 +39,7 @@ import java.util.concurrent.Future;
  */
 @Service
 @Log4j2
+@EnableCaching
 public class EBookServiceImpl implements EbookService {
 
     private final EbookRepository ebookRepository;
@@ -52,7 +54,7 @@ public class EBookServiceImpl implements EbookService {
      * @param modelMapper      The ModelMapper for entity-DTO mapping.
      */
     @Autowired
-    public EBookServiceImpl(EbookRepository ebookRepository, AuthorRepository authorRepository, ModelMapper modelMapper) {
+    public EBookServiceImpl(EbookRepository ebookRepository, AuthorRepository authorRepository, RedisTemplate<String, Object> redisTemplate, ModelMapper modelMapper) {
         this.ebookRepository = ebookRepository;
         this.authorRepository = authorRepository;
         this.modelMapper = modelMapper;
@@ -61,7 +63,7 @@ public class EBookServiceImpl implements EbookService {
     @Async
     @Override
     public Future<Ebook> execute(EBookDTO eBookDTO,MultipartFile file){
-        log.info("Execute method asynchronously - " + Thread.currentThread().getName());
+        log.info("Execute method asynchronously - {}", Thread.currentThread().getName());
 
         try {
             Ebook ebook = save(eBookDTO, file);
@@ -115,7 +117,7 @@ public class EBookServiceImpl implements EbookService {
      * @return The saved EBook entity.
      * @throws IOException If an I/O error occurs while saving the file.
      */
-    @Override
+
     public Ebook save(EBookDTO eBookDTO, MultipartFile multipartFile) throws IOException {
         Path uploadPath = Paths.get("upload");
         if(!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
@@ -146,7 +148,7 @@ public class EBookServiceImpl implements EbookService {
             ebook.setGenres(genres);
 
             return ebookRepository.save(ebook);
-        }catch (IOException | AuthorNotFoundException e){
+        }catch (AuthorNotFoundException e){
             log.error("Error occurred while saving file: {}", e.getMessage());
             throw e;
         }
