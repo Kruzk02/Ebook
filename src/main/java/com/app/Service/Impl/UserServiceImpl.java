@@ -4,11 +4,12 @@ package com.app.Service.Impl;
 import com.app.DTO.LoginDTO;
 import com.app.DTO.RegisterDTO;
 import com.app.Exceptions.UserNotFoundException;
-import com.app.JWT.JwtProvider;
 import com.app.Model.User;
 import com.app.Repository.RoleRepository;
 import com.app.Repository.UserRepository;
 import com.app.Service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,16 +29,14 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final ModelMapper modelMapper;
-    private final JwtProvider jwtProvider;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, ModelMapper modelMapper, JwtProvider jwtProvider) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, ModelMapper modelMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.modelMapper = modelMapper;
-        this.jwtProvider = jwtProvider;
     }
 
     @Override
@@ -49,14 +48,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String login(LoginDTO loginDTO) {
+    public void login(LoginDTO loginDTO) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                loginDTO.getUsername(),loginDTO.getPassword()
-        ));
+                loginDTO.getUsername(), loginDTO.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        return jwtProvider.generateToken(loginDTO.getUsername());
     }
+
 
     @Override
     public User findByUsername(String username) {
