@@ -2,11 +2,12 @@ package com.app.Controller;
 
 import com.app.DTO.EBookDTO;
 import com.app.Exceptions.AuthorNotFoundException;
-import com.app.JWT.JwtProvider;
 import com.app.Model.Ebook;
 import com.app.Model.User;
 import com.app.Service.EbookService;
 import com.app.Service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -29,13 +30,11 @@ public class EBookController {
 
     private final EbookService bookService;
     private final UserService userService;
-    private final JwtProvider jwtProvider;
 
     @Autowired
-    public EBookController(EbookService bookService, UserService userService, JwtProvider jwtProvider) {
+    public EBookController(EbookService bookService, UserService userService) {
         this.bookService = bookService;
         this.userService = userService;
-        this.jwtProvider = jwtProvider;
     }
 
     @GetMapping
@@ -44,23 +43,20 @@ public class EBookController {
         return ResponseEntity.status(HttpStatus.OK).body(ebook);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/upload")
     public ResponseEntity<?> uploadEBook(@ModelAttribute EBookDTO eBookDTO,
-                                         @RequestParam("file")MultipartFile file,
-                                         @RequestHeader("Authorization") String authHeader) throws IOException, AuthorNotFoundException, InterruptedException {
-        String token = extractToken(authHeader);
-
-        if(token != null){
-            String username = jwtProvider.extractUsername(token);
-            User user = userService.findByUsername(username);
-
-            eBookDTO.setUploadBy(user);
-            bookService.execute(eBookDTO,file);
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        }else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Authorization Header");
+                                         HttpServletRequest request,
+                                         @RequestParam("file")MultipartFile file) throws IOException, AuthorNotFoundException, InterruptedException {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("username") == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
+        Object username = session.getAttribute("username");
+        User user = userService.findByUsername(username.toString());
+        eBookDTO.setUploadBy(user);
+        bookService.save(eBookDTO,file);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/download/{id}")

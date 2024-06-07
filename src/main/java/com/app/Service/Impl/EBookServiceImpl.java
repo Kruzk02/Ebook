@@ -60,21 +60,6 @@ public class EBookServiceImpl implements EbookService {
         this.modelMapper = modelMapper;
     }
 
-    @Async
-    @Override
-    public Future<Ebook> execute(EBookDTO eBookDTO,MultipartFile file){
-        log.info("Execute method asynchronously - {}", Thread.currentThread().getName());
-
-        try {
-            Ebook ebook = save(eBookDTO, file);
-            log.info("Asynchronous task completed successfully");
-            return CompletableFuture.completedFuture(ebook);
-        } catch (IOException e){
-            log.error("Error executing asynchronous task: {}", e.getMessage());
-            return CompletableFuture.failedFuture(e);
-        }
-    }
-
     /**
      * Retrieves all EBook.
      *
@@ -118,29 +103,32 @@ public class EBookServiceImpl implements EbookService {
      * @throws IOException If an I/O error occurs while saving the file.
      */
 
+    @Override
     public Ebook save(EBookDTO eBookDTO, MultipartFile multipartFile) throws IOException {
         Path uploadPath = Paths.get("upload");
-        if(!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
 
-        try (InputStream inputStream = multipartFile.getInputStream()){
+        try (InputStream inputStream = multipartFile.getInputStream()) {
             Path filePath = uploadPath.resolve(Objects.requireNonNull(multipartFile.getOriginalFilename()));
-            Files.copy(inputStream,filePath, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            Ebook ebook = modelMapper.map(eBookDTO,Ebook.class);
+            Ebook ebook = modelMapper.map(eBookDTO, Ebook.class);
             ebook.setPdfUrl(filePath.toString());
             ebook.setFileName(multipartFile.getOriginalFilename());
 
             Set<Author> authors = new HashSet<>();
-            for(String authorName : eBookDTO.getAuthors()){
+            for (String authorName : eBookDTO.getAuthors()) {
                 Author author = authorRepository.findByName(authorName);
-                if(author == null){
+                if (author == null) {
                     throw new AuthorNotFoundException("Author not found: " + authorName);
                 }
                 authors.add(author);
             }
 
             Set<Genre> genres = new HashSet<>();
-            for(String genreString : eBookDTO.getGenres()){
+            for (String genreString : eBookDTO.getGenres()) {
                 genres.add(Genre.valueOf(genreString.toUpperCase()));
             }
 
@@ -148,8 +136,11 @@ public class EBookServiceImpl implements EbookService {
             ebook.setGenres(genres);
 
             return ebookRepository.save(ebook);
-        }catch (AuthorNotFoundException e){
-            log.error("Error occurred while saving file: {}", e.getMessage());
+        } catch (IOException e) {
+            log.error("IO Error occurred while saving file: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Error occurred while saving eBook: {}", e.getMessage());
             throw e;
         }
     }

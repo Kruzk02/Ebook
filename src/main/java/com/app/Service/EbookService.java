@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 public interface EbookService {
-    Future<Ebook> execute(EBookDTO eBookDTO,MultipartFile file) throws InterruptedException, IOException;
+    Ebook save(EBookDTO eBookDTO, MultipartFile multipartFile) throws IOException;
     List<Ebook> getAllEBook();
     Ebook getById(Long id);
     Ebook getByAuthor(Author author);
