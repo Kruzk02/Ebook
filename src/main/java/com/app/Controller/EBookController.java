@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.session.Session;
+import org.springframework.session.SessionRepository;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,11 +32,13 @@ public class EBookController {
 
     private final EbookService bookService;
     private final UserService userService;
+    private final SessionRepository sessionRepository;
 
     @Autowired
-    public EBookController(EbookService bookService, UserService userService) {
+    public EBookController(EbookService bookService, UserService userService, SessionRepository sessionRepository) {
         this.bookService = bookService;
         this.userService = userService;
+        this.sessionRepository = sessionRepository;
     }
 
     @GetMapping
@@ -47,13 +51,13 @@ public class EBookController {
     public ResponseEntity<?> uploadEBook(@ModelAttribute EBookDTO eBookDTO,
                                          HttpServletRequest request,
                                          @RequestParam("file")MultipartFile file) throws IOException, AuthorNotFoundException, InterruptedException {
-        HttpSession session = request.getSession(false);
+        Session session = sessionRepository.findById(request.getSession().getId());
         if (session == null || session.getAttribute("username") == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Object username = session.getAttribute("username");
-        User user = userService.findByUsername(username.toString());
+        String username = session.getAttribute("username");
+        User user = userService.findByUsername(username);
         eBookDTO.setUploadBy(user);
         bookService.save(eBookDTO,file);
         return ResponseEntity.status(HttpStatus.CREATED).build();

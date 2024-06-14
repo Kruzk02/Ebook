@@ -2,9 +2,12 @@ package com.app.Controller;
 
 import com.app.Model.User;
 import com.app.Service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.session.Session;
+import org.springframework.session.SessionRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,21 +21,22 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final SessionRepository sessionRepository;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, SessionRepository sessionRepository) {
         this.userService = userService;
+        this.sessionRepository = sessionRepository;
     }
 
     @GetMapping("/info")
-    public ResponseEntity<?> getUserInfo(@RequestHeader("Authorization") String authHeader){
-        return null;
-    }
-
-    private String extractToken(String authHeader){
-        if(authHeader != null && authHeader.startsWith("Bearer")){
-            return authHeader.substring(7);
+    public ResponseEntity<?> getUserInfo(HttpServletRequest request){
+        Session session = sessionRepository.findById(request.getSession().getId());
+        if (session == null || session.getAttribute("username") == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return null;
+        String username = session.getAttribute("username");
+        User user = userService.findByUsername(username);
+        return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 }
