@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,7 +29,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 /**
  * EBook Service class responsible for handling operation relates to EBook Entity. <p>
@@ -93,6 +91,18 @@ public class EBookServiceImpl implements EbookService {
         return ebookRepository.findByAuthors(author);
     }
 
+    @Override
+    public CompletableFuture<Ebook> asyncSave(EBookDTO eBookDTO, MultipartFile multipartFile) {
+        System.out.println(Thread.currentThread().isVirtual());
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return save(eBookDTO,multipartFile);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to save data", e);
+            }
+        });
+    }
+
     /**
      * Saves a new EBook with a provided EBookDTO and MultipartFile. <p>
      * Saves the upload file to the "upload" directory and sets the pdf url and file name to the EBook.
@@ -103,7 +113,6 @@ public class EBookServiceImpl implements EbookService {
      * @throws IOException If an I/O error occurs while saving the file.
      */
 
-    @Override
     public Ebook save(EBookDTO eBookDTO, MultipartFile multipartFile) throws IOException {
         Path uploadPath = Paths.get("upload");
         if (!Files.exists(uploadPath)) {
