@@ -7,14 +7,12 @@ import com.app.Model.User;
 import com.app.Service.EbookService;
 import com.app.Service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.session.Session;
 import org.springframework.session.SessionRepository;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api/ebook")
@@ -50,7 +49,7 @@ public class EBookController {
     @PostMapping("/upload")
     public ResponseEntity<?> uploadEBook(@ModelAttribute EBookDTO eBookDTO,
                                          HttpServletRequest request,
-                                         @RequestParam("file")MultipartFile file) throws IOException, AuthorNotFoundException, InterruptedException {
+                                         @RequestParam("file")MultipartFile file) throws AuthorNotFoundException, InterruptedException, ExecutionException {
         Session session = sessionRepository.findById(request.getSession().getId());
         if (session == null || session.getAttribute("username") == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -59,8 +58,7 @@ public class EBookController {
         String username = session.getAttribute("username");
         User user = userService.findByUsername(username);
         eBookDTO.setUploadBy(user);
-        bookService.save(eBookDTO,file);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(bookService.asyncSave(eBookDTO,file).get());
     }
 
     @PostMapping("/download/{id}")
@@ -86,17 +84,9 @@ public class EBookController {
         return ResponseEntity.status(HttpStatus.OK).body(ebook);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteEBookById(@PathVariable Long id){
         bookService.deleteById(id);
         return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    private String extractToken(String authHeader){
-        if(authHeader != null && authHeader.startsWith("Bearer ")){
-            return authHeader.substring(7);
-        }
-        return null;
     }
 }
