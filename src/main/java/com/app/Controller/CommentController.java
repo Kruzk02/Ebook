@@ -54,10 +54,4 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    private String extractToken(String authHeader) {
-        if (authHeader != null && authHeader.startsWith("Bearer")) {
-            return authHeader.substring(7);
-        }
-        return null;
-    }
 }
