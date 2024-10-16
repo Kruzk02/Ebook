@@ -9,10 +9,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.session.Session;
 import org.springframework.session.SessionRepository;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,15 +59,16 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
-        try {
-            userService.login(loginDTO);
-            Session session = sessionRepository.findById(request.getSession().getId());
+        userService.login(loginDTO);
+
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        Session session = sessionRepository.findById(request.getSession().getId());
+        if (session != null) {
             session.setAttribute("username", loginDTO.getUsername());
+            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext);
             sessionRepository.save(session);
-            return ResponseEntity.ok().body(session.getId());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        return ResponseEntity.ok().body(Map.of("message", "Login successful", "username", loginDTO.getUsername()));
     }
 
     private boolean isValidEmail(String email) {
