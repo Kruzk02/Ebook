@@ -8,7 +8,6 @@ import com.app.Service.Impl.AuthorServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,14 +31,12 @@ public class AuthorController {
         return ResponseEntity.status(HttpStatus.OK).body(authors);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<?> createAuthor(@RequestBody AuthorDTO authorDTO){
         Author author = authorService.save(authorDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(author);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteById(@PathVariable Long id){
         authorService.deleteById(id);
@@ -56,6 +53,4 @@ public class AuthorController {
 
         return ResponseEntity.status(HttpStatus.OK).body(ebook);
     }
-
-
 }
