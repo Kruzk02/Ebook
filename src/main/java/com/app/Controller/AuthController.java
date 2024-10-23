@@ -5,9 +5,15 @@ import com.app.DTO.LoginDTO;
 import com.app.DTO.RegisterDTO;
 import com.app.Model.User;
 import com.app.Service.Impl.UserServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,8 +39,18 @@ public class AuthController {
         this.sessionRepository = sessionRepository;
     }
 
+    @Operation(summary = "Register user account")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Success create account",content = {@Content(mediaType = "application/json",schema = @Schema(implementation = User.class))}),
+        @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content(mediaType = "application/json")),
+        @ApiResponse(responseCode = "409", description = "Username or email is already taken", content = @Content(mediaType = "application/json")),
+        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json"))
+    })
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterDTO registerDTO){
+    public ResponseEntity<String> register(@io.swagger.v3.oas.annotations.parameters.RequestBody(
+                                               description = "Register data to be created", required = true,
+                                               content = @Content(mediaType = "application/json",schema = @Schema(implementation = User.class)))
+                                               @RequestBody RegisterDTO registerDTO){
         if(!isValidEmail(registerDTO.getEmail())){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid email address.");
         }
@@ -53,12 +69,22 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Username is already taken.");
         }
 
-        User user = userService.register(registerDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+        userService.register(registerDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON).body("Success create account");
     }
 
+    @Operation(summary = "Login account")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Success Login", content = {@Content(mediaType = "application/json",schema = @Schema(implementation = Map.class))}),
+        @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content(mediaType = "application/json")), @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json")),
+        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json"))
+    })
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
+    public ResponseEntity<Map<String,String>> login(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Login data", required = true,
+            content = @Content(mediaType = "application/json",schema = @Schema(implementation = User.class)))
+            @RequestBody LoginDTO loginDTO, HttpServletRequest request) {
         userService.login(loginDTO);
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
@@ -68,7 +94,7 @@ public class AuthController {
             session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext);
             sessionRepository.save(session);
         }
-        return ResponseEntity.ok().body(Map.of("message", "Login successful", "username", loginDTO.getUsername()));
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(Map.of("message", "Login successful", "username", loginDTO.getUsername()));
     }
 
     private boolean isValidEmail(String email) {
