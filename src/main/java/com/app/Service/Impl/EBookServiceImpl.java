@@ -2,6 +2,8 @@ package com.app.Service.Impl;
 
 import com.app.DTO.EBookDTO;
 import com.app.Exceptions.EBookNotFoundException;
+import com.app.Exceptions.FileSizeLargeException;
+import com.app.Exceptions.FileTypeNotPDFException;
 import com.app.Model.Author;
 import com.app.Model.Ebook;
 import com.app.Model.Genre;
@@ -93,7 +95,6 @@ public class EBookServiceImpl implements EbookService {
 
     @Override
     public CompletableFuture<Ebook> asyncSave(EBookDTO eBookDTO, MultipartFile multipartFile) {
-        System.out.println(Thread.currentThread().isVirtual());
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return save(eBookDTO,multipartFile);
@@ -117,6 +118,20 @@ public class EBookServiceImpl implements EbookService {
         Path uploadPath = Paths.get("upload");
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
+        }
+
+        int lastIndexOfDot = Objects.requireNonNull(multipartFile.getOriginalFilename()).lastIndexOf('.');
+        String extension = "";
+        if (lastIndexOfDot != 1) {
+            extension = multipartFile.getOriginalFilename().substring(lastIndexOfDot);
+        }
+
+        if (!extension.equals(".pdf")) {
+            throw new FileTypeNotPDFException("File type is not pdf");
+        }
+
+        if (multipartFile.getSize() == 10485760) {
+            throw new FileSizeLargeException("File is large than 10mb");
         }
 
         try (InputStream inputStream = multipartFile.getInputStream()) {
